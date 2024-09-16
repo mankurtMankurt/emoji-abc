@@ -90,15 +90,44 @@
             }
         }
         .background-emoji {
-            position: fixed;
-            font-size: 100px;
-            opacity: 0.1;
+            position: absolute;
+            font-size: 150px;
+            opacity: 0.2;
             z-index: 0;
             animation: float 20s infinite ease-in-out;
         }
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(10deg); }
+        }
+        .small-explosion {
+            position: absolute;
+            font-size: 100px;
+            animation: smallExplode 1s ease-out forwards;
+            z-index: 2;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        @keyframes smallExplode {
+            0% {
+                transform: translate(-50%, -50%) scale(0.1);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+            }
+        }
+        .correct-answer {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
     </style>
 </head>
@@ -119,7 +148,7 @@
             <div id="options-container"></div>
             <div id="score">Score: 0</div>
             <div id="feedback"></div>
-            <button id="next-round" style="display: none;">NEXT</button>
+            <button id="next-round" style="display: none;">NEXT 👉</button>
         </div>
         <div id="end-game-screen" style="display: none;">
             <h1>Game Over!</h1>
@@ -180,14 +209,24 @@
         playAgainButton.onclick = startGame;
         nextRoundButton.onclick = nextRound;
 
-        // Add background emojis
         function addBackgroundEmojis() {
             const emojis = Object.values(emojiMap).map(e => e.emoji);
-            for (let i = 0; i < 10; i++) {
+            const positions = [];
+            for (let i = 0; i < 15; i++) {
+                let x, y;
+                do {
+                    x = Math.random() * (window.innerWidth - 150);
+                    y = Math.random() * (window.innerHeight - 150);
+                } while (positions.some(pos => 
+                    Math.abs(pos.x - x) < 150 && Math.abs(pos.y - y) < 150
+                ));
+                
+                positions.push({x, y});
+                
                 const emoji = document.createElement('div');
                 emoji.className = 'background-emoji';
-                emoji.style.left = `${Math.random() * 100}%`;
-                emoji.style.top = `${Math.random() * 100}%`;
+                emoji.style.left = `${x}px`;
+                emoji.style.top = `${y}px`;
                 emoji.style.animationDelay = `${Math.random() * 20}s`;
                 emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
                 document.body.appendChild(emoji);
@@ -245,8 +284,10 @@
             if (selectedLetter === correctAnswer) {
                 score++;
                 feedbackDisplay.innerHTML = `Correct! It's a ${boldFirstLetter}`;
+                createSmallExplosion('✅');
             } else {
                 feedbackDisplay.innerHTML = `Wrong! It's a ${boldFirstLetter}`;
+                createSmallExplosion('❌');
             }
             scoreDisplay.textContent = `Score: ${score}`;
             
@@ -254,12 +295,24 @@
                 button.disabled = true;
                 if (button.textContent === correctAnswer) {
                     button.style.backgroundColor = '#4CAF50';
+                    button.classList.add('correct-answer');
                 } else if (button.textContent === selectedLetter && selectedLetter !== correctAnswer) {
                     button.style.backgroundColor = '#f44336';
                 }
             });
 
             nextRoundButton.style.display = 'block';
+        }
+
+        function createSmallExplosion(emoji) {
+            const explosion = document.createElement('div');
+            explosion.className = 'small-explosion';
+            explosion.textContent = emoji;
+            gameScreen.appendChild(explosion);
+
+            explosion.addEventListener('animationend', function() {
+                explosion.remove();
+            });
         }
 
         function endGame() {
@@ -283,7 +336,6 @@
                 emoji.textContent = usedEmojis[Math.floor(Math.random() * usedEmojis.length)];
                 document.body.appendChild(emoji);
 
-                // Remove emoji after animation ends
                 emoji.addEventListener('animationend', function() {
                     emoji.remove();
                 });
