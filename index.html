@@ -58,20 +58,60 @@
             margin-top: 20px;
             font-size: 18px;
         }
-        #play-again {
+        #play-again, #start-game, #next-round {
             display: block;
             margin: 20px auto 0;
+        }
+        #welcome-screen, #end-game-screen {
+            text-align: center;
+        }
+        #welcome-screen p, #end-game-screen p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .emoji-explosion {
+            position: absolute;
+            font-size: 30px;
+            animation: explode 2s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes explode {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <h1>Emoji Alphabet Guess Game</h1>
-        <div id="emoji-display"></div>
-        <div id="options-container"></div>
-        <div id="score">Score: 0</div>
-        <div id="feedback"></div>
-        <button id="play-again" style="display: none;">PLAY AGAIN</button>
+        <div id="welcome-screen">
+            <h1>Welcome to Emoji Alphabet Guess!</h1>
+            <p>
+                In this game, you'll see an emoji and three letter options. 
+                Your task is to guess which letter the emoji starts with. 
+                There are 10 rounds in total. Good luck and have fun!
+            </p>
+            <button id="start-game">START GAME</button>
+        </div>
+        <div id="game-screen" style="display: none;">
+            <h1>Emoji Alphabet Guess Game</h1>
+            <div id="emoji-display"></div>
+            <div id="options-container"></div>
+            <div id="score">Score: 0</div>
+            <div id="feedback"></div>
+            <button id="next-round" style="display: none;">NEXT</button>
+        </div>
+        <div id="end-game-screen" style="display: none;">
+            <h1>Game Over!</h1>
+            <div id="final-score"></div>
+            <div id="emoji-summary"></div>
+            <button id="play-again">PLAY AGAIN</button>
+        </div>
     </div>
 
     <script>
@@ -104,19 +144,34 @@
             Z: {emoji: '🦓', name: 'Zebra'}
         };
 
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endGameScreen = document.getElementById('end-game-screen');
         const emojiDisplay = document.getElementById('emoji-display');
         const optionsContainer = document.getElementById('options-container');
         const scoreDisplay = document.getElementById('score');
         const feedbackDisplay = document.getElementById('feedback');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const emojiSummaryDisplay = document.getElementById('emoji-summary');
         const playAgainButton = document.getElementById('play-again');
+        const startGameButton = document.getElementById('start-game');
+        const nextRoundButton = document.getElementById('next-round');
 
         let currentEmoji, correctAnswer, score = 0, round = 0;
         const totalRounds = 10;
+        let usedEmojis = [];
+
+        startGameButton.onclick = startGame;
+        playAgainButton.onclick = startGame;
+        nextRoundButton.onclick = nextRound;
 
         function startGame() {
+            welcomeScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            endGameScreen.style.display = 'none';
             score = 0;
             round = 0;
-            playAgainButton.style.display = 'none';
+            usedEmojis = [];
             nextRound();
         }
 
@@ -129,11 +184,13 @@
             round++;
             feedbackDisplay.textContent = '';
             optionsContainer.innerHTML = '';
+            nextRoundButton.style.display = 'none';
 
             const letters = Object.keys(emojiMap);
             correctAnswer = letters[Math.floor(Math.random() * letters.length)];
             currentEmoji = emojiMap[correctAnswer].emoji;
             emojiDisplay.textContent = currentEmoji;
+            usedEmojis.push(currentEmoji);
 
             const options = [correctAnswer];
             while (options.length < 3) {
@@ -161,18 +218,45 @@
                 feedbackDisplay.innerHTML = `Wrong! It's a ${boldFirstLetter}`;
             }
             scoreDisplay.textContent = `Score: ${score}`;
-            setTimeout(nextRound, 1500);
+            
+            optionsContainer.querySelectorAll('button').forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.style.backgroundColor = '#4CAF50';
+                } else if (button.textContent === selectedLetter && selectedLetter !== correctAnswer) {
+                    button.style.backgroundColor = '#f44336';
+                }
+            });
+
+            nextRoundButton.style.display = 'block';
         }
 
         function endGame() {
-            emojiDisplay.textContent = '🎉';
-            optionsContainer.innerHTML = '';
-            feedbackDisplay.textContent = `Game Over! Your final score is ${score} out of ${totalRounds}`;
-            playAgainButton.style.display = 'block';
+            gameScreen.style.display = 'none';
+            endGameScreen.style.display = 'block';
+            finalScoreDisplay.textContent = `You guessed ${score} out of ${totalRounds} correctly!`;
+            emojiSummaryDisplay.textContent = `Emojis you saw: ${usedEmojis.join(' ')}`;
+
+            if (score === totalRounds) {
+                createEmojiExplosion();
+            }
         }
 
-        playAgainButton.onclick = startGame;
-        startGame();
+        function createEmojiExplosion() {
+            for (let i = 0; i < 50; i++) {
+                const emoji = document.createElement('div');
+                emoji.className = 'emoji-explosion';
+                emoji.style.left = `${Math.random() * 100}%`;
+                emoji.style.animationDelay = `${Math.random() * 2}s`;
+                emoji.textContent = usedEmojis[Math.floor(Math.random() * usedEmojis.length)];
+                document.body.appendChild(emoji);
+
+                // Remove emoji after animation ends
+                emoji.addEventListener('animationend', function() {
+                    emoji.remove();
+                });
+            }
+        }
     </script>
 </body>
 </html>
