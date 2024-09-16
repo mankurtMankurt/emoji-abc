@@ -20,6 +20,8 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
         }
         h1 {
             color: #333;
@@ -56,6 +58,10 @@
             margin-top: 20px;
             font-size: 18px;
         }
+        #play-again {
+            display: block;
+            margin: 20px auto 0;
+        }
     </style>
 </head>
 <body>
@@ -65,14 +71,37 @@
         <div id="options-container"></div>
         <div id="score">Score: 0</div>
         <div id="feedback"></div>
-        <button id="play-again" style="display: none;">Play Again</button>
+        <button id="play-again" style="display: none;">PLAY AGAIN</button>
     </div>
 
     <script>
         const emojiMap = {
-            A: '🍎', B: '🍌', C: '🐱', D: '🐶', E: '🐘', F: '🐸', G: '🦒', H: '🏠', I: '🍦',
-            J: '🤹', K: '🔑', L: '🦁', M: '🌙', N: '👃', O: '🐙', P: '🍕', Q: '👸', R: '🏃‍♂️',
-            S: '🐍', T: '🌳', U: '☂️', V: '🚐', W: '🌊', X: '❌', Y: '😋', Z: '🦓'
+            A: {emoji: '🍎', name: 'Apple'},
+            B: {emoji: '🍌', name: 'Banana'},
+            C: {emoji: '🐱', name: 'Cat'},
+            D: {emoji: '🐶', name: 'Dog'},
+            E: {emoji: '🐘', name: 'Elephant'},
+            F: {emoji: '🐸', name: 'Frog'},
+            G: {emoji: '🦒', name: 'Giraffe'},
+            H: {emoji: '🏠', name: 'House'},
+            I: {emoji: '🍦', name: 'Ice cream'},
+            J: {emoji: '🤹', name: 'Juggler'},
+            K: {emoji: '🔑', name: 'Key'},
+            L: {emoji: '🦁', name: 'Lion'},
+            M: {emoji: '🌙', name: 'Moon'},
+            N: {emoji: '👃', name: 'Nose'},
+            O: {emoji: '🐙', name: 'Octopus'},
+            P: {emoji: '🍕', name: 'Pizza'},
+            Q: {emoji: '👸', name: 'Queen'},
+            R: {emoji: '🏃‍♂️', name: 'Runner'},
+            S: {emoji: '🐍', name: 'Snake'},
+            T: {emoji: '🌳', name: 'Tree'},
+            U: {emoji: '☂️', name: 'Umbrella'},
+            V: {emoji: '🚐', name: 'Van'},
+            W: {emoji: '🌊', name: 'Wave'},
+            X: {emoji: '❌', name: 'X-mark'},
+            Y: {emoji: '😋', name: 'Yummy face'},
+            Z: {emoji: '🦓', name: 'Zebra'}
         };
 
         const emojiDisplay = document.getElementById('emoji-display');
@@ -103,7 +132,7 @@
 
             const letters = Object.keys(emojiMap);
             correctAnswer = letters[Math.floor(Math.random() * letters.length)];
-            currentEmoji = emojiMap[correctAnswer];
+            currentEmoji = emojiMap[correctAnswer].emoji;
             emojiDisplay.textContent = currentEmoji;
 
             const options = [correctAnswer];
@@ -123,11 +152,13 @@
         }
 
         function checkAnswer(selectedLetter) {
+            const emojiName = emojiMap[correctAnswer].name;
+            const boldFirstLetter = `<b>${emojiName[0]}</b>${emojiName.slice(1)}`;
             if (selectedLetter === correctAnswer) {
                 score++;
-                feedbackDisplay.textContent = 'Correct!';
+                feedbackDisplay.innerHTML = `Correct! It's a ${boldFirstLetter}`;
             } else {
-                feedbackDisplay.textContent = `Wrong! The correct answer was ${correctAnswer}`;
+                feedbackDisplay.innerHTML = `Wrong! It's a ${boldFirstLetter}`;
             }
             scoreDisplay.textContent = `Score: ${score}`;
             setTimeout(nextRound, 1500);
