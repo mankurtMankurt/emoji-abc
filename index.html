@@ -13,15 +13,18 @@
             height: 100vh;
             margin: 0;
             background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            overflow: hidden;
         }
         #game-container {
             text-align: center;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             max-width: 500px;
             width: 100%;
+            position: relative;
+            z-index: 1;
         }
         h1 {
             color: #333;
@@ -70,20 +73,32 @@
             margin-bottom: 20px;
         }
         .emoji-explosion {
-            position: absolute;
-            font-size: 30px;
-            animation: explode 2s ease-out forwards;
+            position: fixed;
+            font-size: 50px;
+            animation: explode 3s ease-out forwards;
             opacity: 0;
+            z-index: 2;
         }
         @keyframes explode {
             0% {
-                transform: translateY(0);
+                transform: translateY(0) scale(0.5);
                 opacity: 1;
             }
             100% {
-                transform: translateY(-100px);
+                transform: translateY(-200px) scale(1.5);
                 opacity: 0;
             }
+        }
+        .background-emoji {
+            position: fixed;
+            font-size: 100px;
+            opacity: 0.1;
+            z-index: 0;
+            animation: float 20s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
         }
     </style>
 </head>
@@ -165,6 +180,22 @@
         playAgainButton.onclick = startGame;
         nextRoundButton.onclick = nextRound;
 
+        // Add background emojis
+        function addBackgroundEmojis() {
+            const emojis = Object.values(emojiMap).map(e => e.emoji);
+            for (let i = 0; i < 10; i++) {
+                const emoji = document.createElement('div');
+                emoji.className = 'background-emoji';
+                emoji.style.left = `${Math.random() * 100}%`;
+                emoji.style.top = `${Math.random() * 100}%`;
+                emoji.style.animationDelay = `${Math.random() * 20}s`;
+                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                document.body.appendChild(emoji);
+            }
+        }
+
+        addBackgroundEmojis();
+
         function startGame() {
             welcomeScreen.style.display = 'none';
             gameScreen.style.display = 'block';
@@ -243,11 +274,12 @@
         }
 
         function createEmojiExplosion() {
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 100; i++) {
                 const emoji = document.createElement('div');
                 emoji.className = 'emoji-explosion';
                 emoji.style.left = `${Math.random() * 100}%`;
-                emoji.style.animationDelay = `${Math.random() * 2}s`;
+                emoji.style.top = `${Math.random() * 100}%`;
+                emoji.style.animationDelay = `${Math.random() * 3}s`;
                 emoji.textContent = usedEmojis[Math.floor(Math.random() * usedEmojis.length)];
                 document.body.appendChild(emoji);
 
