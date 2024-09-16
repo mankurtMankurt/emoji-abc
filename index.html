@@ -3,109 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emoji Alphabet Adventure</title>
-    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Emoji Alphabet Guess Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+        }
+        #game-container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            font-size: 2.5rem;
+        }
+        #emoji-display {
+            font-size: 100px;
+            margin: 20px 0;
+        }
+        #options-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #score, #feedback {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
-    <script type="text/babel">
-        const { useState } = React;
+    <div id="game-container">
+        <h1>Emoji Alphabet Guess Game</h1>
+        <div id="emoji-display"></div>
+        <div id="options-container"></div>
+        <div id="score">Score: 0</div>
+        <div id="feedback"></div>
+        <button id="play-again" style="display: none;">Play Again</button>
+    </div>
 
+    <script>
         const emojiMap = {
             A: '🍎', B: '🍌', C: '🐱', D: '🐶', E: '🐘', F: '🐸', G: '🦒', H: '🏠', I: '🍦',
             J: '🤹', K: '🔑', L: '🦁', M: '🌙', N: '👃', O: '🐙', P: '🍕', Q: '👸', R: '🏃‍♂️',
             S: '🐍', T: '🌳', U: '☂️', V: '🚐', W: '🌊', X: '❌', Y: '😋', Z: '🦓'
         };
 
-        const Button = ({ children, onClick, className }) => (
-            <button
-                onClick={onClick}
-                className={`${className} py-2 px-4 rounded-full font-bold`}
-            >
-                {children}
-            </button>
-        );
+        const emojiDisplay = document.getElementById('emoji-display');
+        const optionsContainer = document.getElementById('options-container');
+        const scoreDisplay = document.getElementById('score');
+        const feedbackDisplay = document.getElementById('feedback');
+        const playAgainButton = document.getElementById('play-again');
 
-        const LandingPage = ({ onStartGame }) => (
-            <div className="min-h-screen bg-gradient-to-r from-pink-300 to-purple-300 flex flex-col items-center justify-center p-4">
-                <h1 className="text-4xl md:text-6xl font-bold text-white mb-8 text-center">
-                    Emoji Alphabet Adventure
-                </h1>
-                <Button 
-                    className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 text-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
-                    onClick={onStartGame}
-                >
-                    Start Game
-                </Button>
-            </div>
-        );
+        let currentEmoji, correctAnswer, score = 0, round = 0;
+        const totalRounds = 10;
 
-        const Stage1 = ({ onComplete }) => {
-            const [revealedLetters, setRevealedLetters] = useState([]);
-            const [currentLetter, setCurrentLetter] = useState(null);
-            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        function startGame() {
+            score = 0;
+            round = 0;
+            playAgainButton.style.display = 'none';
+            nextRound();
+        }
 
-            const handleLetterClick = (letter) => {
-                if (!revealedLetters.includes(letter)) {
-                    setCurrentLetter(letter);
-                    setRevealedLetters([...revealedLetters, letter]);
+        function nextRound() {
+            if (round >= totalRounds) {
+                endGame();
+                return;
+            }
+
+            round++;
+            feedbackDisplay.textContent = '';
+            optionsContainer.innerHTML = '';
+
+            const letters = Object.keys(emojiMap);
+            correctAnswer = letters[Math.floor(Math.random() * letters.length)];
+            currentEmoji = emojiMap[correctAnswer];
+            emojiDisplay.textContent = currentEmoji;
+
+            const options = [correctAnswer];
+            while (options.length < 3) {
+                const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                if (!options.includes(randomLetter)) {
+                    options.push(randomLetter);
                 }
-            };
+            }
 
-            return (
-                <div className="min-h-screen bg-gradient-to-r from-blue-300 to-purple-300 p-8">
-                    <h2 className="text-4xl font-bold text-center mb-8 text-white">Find the Emojis</h2>
-                    
-                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4 mb-8">
-                        {alphabet.map((letter) => (
-                            <Button
-                                key={letter}
-                                onClick={() => handleLetterClick(letter)}
-                                className={`w-16 h-16 text-2xl ${
-                                    revealedLetters.includes(letter) ? 'bg-green-500' : 'bg-blue-500'
-                                } text-white`}
-                            >
-                                {revealedLetters.includes(letter) ? emojiMap[letter] : letter}
-                            </Button>
-                        ))}
-                    </div>
+            options.sort(() => Math.random() - 0.5).forEach(letter => {
+                const button = document.createElement('button');
+                button.textContent = letter;
+                button.onclick = () => checkAnswer(letter);
+                optionsContainer.appendChild(button);
+            });
+        }
 
-                    {currentLetter && (
-                        <div className="text-center text-4xl font-bold text-white">
-                            {currentLetter} is for {emojiMap[currentLetter]}
-                        </div>
-                    )}
+        function checkAnswer(selectedLetter) {
+            if (selectedLetter === correctAnswer) {
+                score++;
+                feedbackDisplay.textContent = 'Correct!';
+            } else {
+                feedbackDisplay.textContent = `Wrong! The correct answer was ${correctAnswer}`;
+            }
+            scoreDisplay.textContent = `Score: ${score}`;
+            setTimeout(nextRound, 1500);
+        }
 
-                    <div className="mt-8 text-center">
-                        <Button
-                            onClick={onComplete}
-                            className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 text-xl"
-                        >
-                            {revealedLetters.length === alphabet.length ? "Finish" : `${revealedLetters.length}/${alphabet.length} Found`}
-                        </Button>
-                    </div>
-                </div>
-            );
-        };
+        function endGame() {
+            emojiDisplay.textContent = '🎉';
+            optionsContainer.innerHTML = '';
+            feedbackDisplay.textContent = `Game Over! Your final score is ${score} out of ${totalRounds}`;
+            playAgainButton.style.display = 'block';
+        }
 
-        const App = () => {
-            const [gameState, setGameState] = useState('landing');
-
-            const startGame = () => setGameState('stage1');
-            const finishGame = () => setGameState('landing');
-
-            return (
-                <div>
-                    {gameState === 'landing' && <LandingPage onStartGame={startGame} />}
-                    {gameState === 'stage1' && <Stage1 onComplete={finishGame} />}
-                </div>
-            );
-        };
-
-        ReactDOM.render(<App />, document.getElementById('root'));
+        playAgainButton.onclick = startGame;
+        startGame();
     </script>
 </body>
 </html>
