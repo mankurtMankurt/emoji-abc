@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Emoji Alphabet Guess Game</title>
     <style>
         body {
@@ -10,7 +10,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background: linear-gradient(to right, #ff9a9e, #fad0c4);
             overflow: hidden;
@@ -21,22 +21,23 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            max-width: 500px;
+            max-width: 90%;
             width: 100%;
             position: relative;
             z-index: 1;
         }
         h1 {
             color: #333;
-            font-size: 2.5rem;
+            font-size: 2rem;
         }
         #emoji-display {
-            font-size: 100px;
+            font-size: 80px;
             margin: 20px 0;
         }
         #options-container {
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
             gap: 10px;
             margin-top: 20px;
         }
@@ -53,8 +54,9 @@
             cursor: pointer;
             border-radius: 12px;
             transition: background-color 0.3s;
+            touch-action: manipulation;
         }
-        button:hover {
+        button:hover, button:active {
             background-color: #45a049;
         }
         #score, #feedback {
@@ -69,12 +71,12 @@
             text-align: center;
         }
         #welcome-screen p, #end-game-screen p {
-            font-size: 18px;
+            font-size: 16px;
             margin-bottom: 20px;
         }
         .emoji-explosion {
             position: fixed;
-            font-size: 50px;
+            font-size: 30px;
             animation: explode 3s ease-out forwards;
             opacity: 0;
             z-index: 2;
@@ -85,13 +87,13 @@
                 opacity: 1;
             }
             100% {
-                transform: translateY(-200px) scale(1.5);
+                transform: translateY(-100px) scale(1.5);
                 opacity: 0;
             }
         }
         .background-emoji {
-            position: absolute;
-            font-size: 150px;
+            position: fixed;
+            font-size: 100px;
             opacity: 0.2;
             z-index: 0;
             animation: float 20s infinite ease-in-out;
@@ -102,7 +104,7 @@
         }
         .small-explosion {
             position: absolute;
-            font-size: 100px;
+            font-size: 60px;
             animation: smallExplode 1s ease-out forwards;
             z-index: 2;
             left: 50%;
@@ -205,28 +207,28 @@
         const totalRounds = 10;
         let usedEmojis = [];
 
-        startGameButton.onclick = startGame;
-        playAgainButton.onclick = startGame;
-        nextRoundButton.onclick = nextRound;
+        startGameButton.addEventListener('click', startGame);
+        playAgainButton.addEventListener('click', startGame);
+        nextRoundButton.addEventListener('click', nextRound);
 
         function addBackgroundEmojis() {
             const emojis = Object.values(emojiMap).map(e => e.emoji);
             const positions = [];
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 10; i++) {
                 let x, y;
                 do {
-                    x = Math.random() * (window.innerWidth - 150);
-                    y = Math.random() * (window.innerHeight - 150);
+                    x = Math.random() * 100;
+                    y = Math.random() * 100;
                 } while (positions.some(pos => 
-                    Math.abs(pos.x - x) < 150 && Math.abs(pos.y - y) < 150
+                    Math.abs(pos.x - x) < 20 && Math.abs(pos.y - y) < 20
                 ));
                 
                 positions.push({x, y});
                 
                 const emoji = document.createElement('div');
                 emoji.className = 'background-emoji';
-                emoji.style.left = `${x}px`;
-                emoji.style.top = `${y}px`;
+                emoji.style.left = `${x}%`;
+                emoji.style.top = `${y}%`;
                 emoji.style.animationDelay = `${Math.random() * 20}s`;
                 emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
                 document.body.appendChild(emoji);
@@ -273,7 +275,7 @@
             options.sort(() => Math.random() - 0.5).forEach(letter => {
                 const button = document.createElement('button');
                 button.textContent = letter;
-                button.onclick = () => checkAnswer(letter);
+                button.addEventListener('click', () => checkAnswer(letter));
                 optionsContainer.appendChild(button);
             });
         }
@@ -327,7 +329,7 @@
         }
 
         function createEmojiExplosion() {
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 50; i++) {
                 const emoji = document.createElement('div');
                 emoji.className = 'emoji-explosion';
                 emoji.style.left = `${Math.random() * 100}%`;
