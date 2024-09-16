@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Emoji Alphabet Guess Game</title>
+    <title>ABCmoji</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -131,21 +131,34 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
+        .rainbow-text {
+            font-size: 3rem;
+            font-weight: bold;
+            background-image: linear-gradient(to right, violet, indigo, blue, green, yellow, orange, red);
+            -webkit-background-clip: text;
+            color: transparent;
+            animation: rainbow-animation 5s linear infinite;
+            background-size: 200% 100%;
+        }
+        @keyframes rainbow-animation {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
     </style>
 </head>
 <body>
     <div id="game-container">
         <div id="welcome-screen">
-            <h1>Welcome to Emoji Alphabet Guess!</h1>
+            <h1 class="rainbow-text">ABCmoji</h1>
             <p>
-                In this game, you'll see an emoji and three letter options. 
+                Welcome to ABCmoji! In this game, you'll see an emoji and three letter options. 
                 Your task is to guess which letter the emoji starts with. 
                 There are 10 rounds in total. Good luck and have fun!
             </p>
             <button id="start-game">START GAME</button>
         </div>
         <div id="game-screen" style="display: none;">
-            <h1>Emoji Alphabet Guess Game</h1>
+            <h1>ABCmoji</h1>
             <div id="emoji-display"></div>
             <div id="options-container"></div>
             <div id="score">Score: 0</div>
